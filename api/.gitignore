@@ -1,0 +1,18 @@
+# OSX
+#
+.DS_Store
+
+# node.js
+#
+.idea/
+.vscode/
+node_modules/
+build/
+temp/
+npm-debug.log
+yarn-error.log
+
+dist/
+
+tmp/*
+!tmp/.gitkeep
