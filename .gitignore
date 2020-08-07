@@ -1,5 +1,5 @@
 ssl
-nginx
+nginx/*
 
 !nginx/nginx.conf
 
