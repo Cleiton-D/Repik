@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MdPublic } from 'react-icons/md';
-import {
-  formatDistanceToNowStrict,
-  parseISO,
-  formatDistanceStrict,
-} from 'date-fns';
+import { parseISO, formatDistanceStrict } from 'date-fns';
 
 import List from '../../components/List';
 
@@ -42,8 +38,6 @@ const Dashboard: React.FC = () => {
           ),
         }),
       );
-
-      console.log(newRepositories);
 
       setRepositories(newRepositories);
     }

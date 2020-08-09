@@ -15,13 +15,6 @@ interface RouteProps extends ReactDOMRouteProps {
   component: React.ComponentType;
 }
 
-const PrivateWrapper: React.FC = ({ children }) => (
-  <>
-    <Header />
-    <Wrapper>{children}</Wrapper>
-  </>
-);
-
 const Route: React.FC<RouteProps> = ({
   isPrivate = false,
   component: Component,
@@ -32,6 +25,7 @@ const Route: React.FC<RouteProps> = ({
 
   return (
     <ReactDOMRoute
+      path={path}
       {...rest}
       render={({ location }) => {
         if (path === '/' && user) {
@@ -42,7 +36,8 @@ const Route: React.FC<RouteProps> = ({
           );
         }
 
-        return !isPrivate || !!user ? (
+        if (!isPrivate) return <Component />;
+        return isPrivate && !!user ? (
           <PrivateWrapper>
             <Component />
           </PrivateWrapper>
@@ -53,5 +48,12 @@ const Route: React.FC<RouteProps> = ({
     />
   );
 };
+
+const PrivateWrapper: React.FC = ({ children }) => (
+  <>
+    <Header />
+    <Wrapper>{children}</Wrapper>
+  </>
+);
 
 export default Route;
