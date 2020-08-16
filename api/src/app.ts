@@ -14,6 +14,7 @@ app.use(express.json());
 app.use('/health', (request, response) => {
   return response.json({ status: 'healthy' });
 });
+
 app.use(routes);
 
 app.use(
