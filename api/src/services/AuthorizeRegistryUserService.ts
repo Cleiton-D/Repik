@@ -1,11 +1,14 @@
 import path from 'path';
+import fs from 'fs';
 import { getRepository } from 'typeorm';
+import base32 from 'hi-base32';
+import crypto from 'crypto';
 
 import User from '../models/User';
 import Repository from '../models/Repository';
 
-import { externalScripts, certs } from '../config/paths';
-import runCommand from '../utils/runCommand';
+import { certs } from '../config/paths';
+import { sign } from 'jsonwebtoken';
 
 interface Request {
   user: User;
@@ -13,31 +16,53 @@ interface Request {
   scope: string;
 }
 
+interface AccessData {
+  type: string;
+  name: string;
+  actions: string[];
+}
+
 type ScopeType = 'repository' | 'registry';
 type ScopeAction = 'push' | 'pull' | '*';
 
 class AuthorizeRegistryUserService {
   public async execute({ user, service, scope }: Request): Promise<string> {
-    const newScope = scope ? await this.loadScope(scope, user.login) : '';
+    const actions = scope ? await this.loadScope(scope, user.login) : undefined;
 
-    const cmd = `go run ${path.join(
-      externalScripts,
-      'token.go',
-    )} -key ${path.join(
-      certs,
-      'server-key.pem',
-    )} -service ${service} -issuer Issuer -username ${
-      user.login || user.email
-    } -scope '${newScope || ''}'`;
+    const pemKey = fs.readFileSync(path.join(certs, 'server-key.pem'));
+    const pkey = crypto.createPublicKey(pemKey);
+    const publicDer = pkey.export({ type: 'spki', format: 'der' });
 
-    const token = await runCommand(cmd);
+    const hash = crypto.createHash('sha256').update(publicDer).digest('hex');
+    const b = Buffer.from(hash, 'hex').slice(0, 30);
+
+    const keyID = base32
+      .encode(b)
+      .match(/.{1,4}/g)
+      ?.join(':');
+
+    const token = sign(
+      {
+        access: actions ? [actions] : [],
+      },
+      pemKey,
+      {
+        issuer: 'Issuer',
+        subject: user.id,
+        audience: service,
+        expiresIn: '7d',
+        keyid: keyID,
+        algorithm: 'RS256',
+      },
+    );
+
     return token;
   }
 
   private async loadScope(
     scope: string,
     login: string | undefined,
-  ): Promise<string> {
+  ): Promise<AccessData> {
     const repositoryRepository = getRepository(Repository);
 
     // repository:username/reponame:action,action
@@ -86,16 +111,15 @@ class AuthorizeRegistryUserService {
             }
           }
 
-          accumulator.push(action);
           return accumulator;
         },
         [],
       );
 
-      return `${type}:${name}:${newActions.join(',')}`;
+      return { type, name, actions: newActions };
     }
 
-    return scope;
+    return {} as AccessData;
   }
 }
 

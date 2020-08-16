@@ -1,19 +1,19 @@
 version: "2.1"
 services:
-  backend:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
-    volumes:
-      - ./ssl:/certs:ro
-    depends_on:
-      database:
-          condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://backend:3333/health"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
+  # backend:
+  #   build:
+  #     context: ./api
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./ssl:/certs:ro
+  #   depends_on:
+  #     database:
+  #         condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://backend:3332/health"]
+  #     interval: 10s
+  #     timeout: 15s
+  #     retries: 5
   
   frontend:
     build:
@@ -43,7 +43,7 @@ services:
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       REGISTRY_AUTH: token
-      REGISTRY_AUTH_TOKEN_REALM: https://127.0.0.1/api/registry/auth
+      REGISTRY_AUTH_TOKEN_REALM: http://192.168.0.120:3333/registry/auth
       REGISTRY_AUTH_TOKEN_SERVICE: Authentication
       REGISTRY_AUTH_TOKEN_ISSUER: Issuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/server-cert.pem
@@ -53,7 +53,7 @@ services:
 
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: repik
-          url: https://127.0.0.1/api/registry/webhooks
+          url: http://192.168.0.120:3333/registry/webhooks
           timeout: 2000ms
           threshold: 5
           backoff: 1s
@@ -70,9 +70,9 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/certs:ro
-    depends_on:
-      backend:
-          condition: service_healthy
+    # depends_on:
+    #   backend:
+    #       condition: service_healthy
     ports:
       - 80:80
       - 443:443
