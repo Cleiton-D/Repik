@@ -19,11 +19,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://frontend"]
-      interval: 10s
-      timeout: 15s
-      retries: 5
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://frontend"]
+    #   interval: 10s
+    #   timeout: 15s
+    #   retries: 5
 
   database:
     image: postgres
@@ -53,7 +53,7 @@ services:
 
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: repik
-          url: https://127.0.0.1/api/registry/webhooks
+          url: http://backend:3333/registry/webhooks
           timeout: 2000ms
           threshold: 5
           backoff: 1s
@@ -64,6 +64,9 @@ services:
        - ./ssl:/certs:ro
        - ./registry/config.yml:/etc/docker/registry/config.yml:ro
        - ./registry/init:/etc/docker/registry/init:ro
+    depends_on:
+      backend:
+          condition: service_healthy
 
   proxy:
     image: nginx

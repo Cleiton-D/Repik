@@ -1,18 +1,30 @@
 import path from 'path';
 import crypto from 'crypto';
-import multer from 'multer';
+import multer, { StorageEngine } from 'multer';
 
-const tempFolder = path.resolve(__dirname, '..', '..', 'tmp');
+const tmpFolder = path.resolve(__dirname, '..', '..', 'tmp');
+
+type UploadConfig = {
+  tmpFolder: string;
+  uploadsFolder: string;
+  multer: {
+    storage: StorageEngine;
+  };
+};
 
 export default {
-  directory: tempFolder,
-  storage: multer.diskStorage({
-    destination: tempFolder,
-    filename: (request, file, callback) => {
-      const filehash = crypto.randomBytes(10).toString('hex');
-      const filename = `${filehash}-${file.originalname}`;
+  tmpFolder,
+  uploadsFolder: path.join(tmpFolder, 'uploads'),
 
-      return callback(null, filename);
-    },
-  }),
-};
+  multer: {
+    storage: multer.diskStorage({
+      destination: tmpFolder,
+      filename: (request, file, callback) => {
+        const filehash = crypto.randomBytes(10).toString('hex');
+        const filename = `${filehash}-${file.originalname}`;
+
+        return callback(null, filename);
+      },
+    }),
+  },
+} as UploadConfig;

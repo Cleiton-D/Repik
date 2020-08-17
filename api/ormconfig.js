@@ -5,9 +5,9 @@ module.exports = {
   username: 'postgres',
   password: 'password',
   database: 'repik',
-  entities: ['./dist/models/*.js'],
-  migrations: ['./dist/database/migrations/*.js'],
+  entities: ['./dist/modules/**/infra/typeorm/entities/*.js'],
+  migrations: ['./dist/shared/infra/typeorm/migrations/*.js'],
   cli: {
-    migrationsDir: './dist/database/migrations',
+    migrationsDir: './dist/shared/infra/typeorm/migrations',
   },
 };

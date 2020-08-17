@@ -43,7 +43,7 @@ services:
     command: ["/bin/sh", "/etc/docker/registry/init"]
     environment:
       REGISTRY_AUTH: token
-      REGISTRY_AUTH_TOKEN_REALM: http://192.168.0.120:3333/registry/auth
+      REGISTRY_AUTH_TOKEN_REALM: http://127.0.0.1:3333/registry/auth
       REGISTRY_AUTH_TOKEN_SERVICE: Authentication
       REGISTRY_AUTH_TOKEN_ISSUER: Issuer
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/server-cert.pem
@@ -53,7 +53,7 @@ services:
 
       REGISTRY_NOTIFICATIONS_ENDPOINTS: >
         - name: repik
-          url: http://192.168.0.120:3333/registry/webhooks
+          url: http://127.0.0.1:3333/registry/webhooks
           timeout: 2000ms
           threshold: 5
           backoff: 1s
